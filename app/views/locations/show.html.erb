@@ -1,0 +1,111 @@
+<div class="container">
+
+	<div class="row justify-content-center">
+		<p>
+			<strong>My Location:</strong>
+			<%= @location.my_location %>
+		</p>
+
+
+		<h2> The Closest Buses Are...</h2>
+	</div>
+
+	<div class="row">
+			<p id="notice"><%= notice %></p>
+
+		
+	<% if @bus_count == 0 %>
+		<p> Not very close, stick our your thumb...</p>
+	<% else %>
+
+				<div class="bus-map" id="map-canvas"></div>
+	</div>
+	<div class="row">
+
+				<script>
+
+					var map;
+
+					$(document).ready(function (){
+						var userCoords = new google.maps.LatLng(<%= @location.latitude %>, <%= @location.longitude %>);
+						var mapOptions = {
+						center: userCoords,
+						zoom: 13,
+						scrollwheel: false
+				      };
+						      
+				      map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				      // This is the text for our user
+				      var contentStringUser = "You are here!";
+
+				      // This is the marker for our users position
+				      var userMarker = new google.maps.Marker({
+				        position: userCoords,
+				    	map: map,
+						animation: google.maps.Animation.DROP
+				      });
+
+				       // Info window and event listener for the user
+				      var infoWindowUser = new google.maps.InfoWindow({
+				        content: contentStringUser
+				      });
+
+				      google.maps.event.addListener(userMarker, 'click', function() {
+				        infoWindowUser.open(map, userMarker);
+				      });
+
+					});
+					
+				</script>
+
+				<% @nearby_buses.each do |bus| %>
+
+					<p>
+						<strong>Route:</strong> <%= bus["ROUTE"] %><br />
+			            
+						<strong>Adherence:</strong> <%= bus["ADHERENCE"] %><br />
+
+			            <strong>Next Stop:</strong> <%= bus["TIMEPOINT"] %>
+					</p>
+
+			<script>
+
+				$(document).ready(function (){
+				  
+				     
+				     var busCoords = new google.maps.LatLng(<%= bus["LATITUDE"] %>, <%= bus["LONGITUDE"] %>);
+				      
+				      // This is the text for our bus
+				      var contentStringBus = "<p><strong>Route:</strong> <%= bus["ROUTE"] %><br />\
+				      <strong>Adherence:</strong> <%= bus["ADHERENCE"] %><br />\
+				      <strong>Next Stop:</strong> <%= bus["TIMEPOINT"] %></p>"; 
+
+
+				      // This is the marker that shows where the bus is
+				      var busMarker = new google.maps.Marker({
+				        position: busCoords,
+				        icon: {url: '<%= asset_path('bus.png')%>', scaledSize: { width: 30, height: 30} },
+				        map: map,
+						animation: google.maps.Animation.DROP
+				      });
+
+				     // Info window and event listener for the bus
+				      var infoWindowBus = new google.maps.InfoWindow({
+				        content: contentStringBus
+				      });
+
+				      google.maps.event.addListener(busMarker, 'click', function() {
+				        infoWindowBus.open(map, busMarker);
+				      });
+			  
+				 
+				  });
+						
+				</script>
+  			<% end %>
+		<% end %>
+
+			<%= link_to 'Change My Location', root_path %>
+	</div>
+</div>
